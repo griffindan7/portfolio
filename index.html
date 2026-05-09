@@ -57,6 +57,7 @@
     font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
     padding: 24px;
     background-image: radial-gradient(ellipse at 30% 20%, #3a3a4a 0%, #1c1c1e 100%);
+    position: relative;
   }
 
   /* WINDOW */
@@ -69,6 +70,16 @@
     border: 0.5px solid rgba(0,0,0,0.5);
     background: var(--main-bg);
     user-select: none;
+    transition: all 0.3s ease;
+  }
+  .window.maximized {
+    width: 90vw;
+    height: 90vh;
+    border-radius: 0;
+    max-width: none;
+  }
+  .window.maximized .finder-body {
+    height: calc(100% - 106px);
   }
 
   /* TITLEBAR */
@@ -386,6 +397,16 @@
     100% { opacity: 1; transform: scale(1); }
   }
   .window.gotcha { animation: closeGotcha 0.6s ease-out; }
+  @keyframes minimizeToDoc {
+    0% { opacity: 1; transform: scale(1) translate(0, 0); }
+    100% { opacity: 0.3; transform: scale(0.1) translate(-350px, 300px); }
+  }
+  .window.minimized { animation: minimizeToDoc 0.5s ease-in forwards; pointer-events: none; }
+  @keyframes maximizeFromDoc {
+    0% { opacity: 0.3; transform: scale(0.1) translate(-350px, 300px); }
+    100% { opacity: 1; transform: scale(1) translate(0, 0); }
+  }
+  .window.restoring { animation: maximizeFromDoc 0.4s ease-out forwards; }
 </style>
 </head>
 <body>
@@ -396,8 +417,8 @@
   <div class="titlebar">
     <div class="traffic-lights">
       <div class="dot dot-r" title="Close" onclick="closeGotcha()">✕</div>
-      <div class="dot dot-y" title="Minimise">−</div>
-      <div class="dot dot-g" title="Maximise">+</div>
+      <div class="dot dot-y" title="Minimise" onclick="minimizeWindow()">−</div>
+      <div class="dot dot-g" title="Maximise" onclick="toggleMaximize()">+</div>
     </div>
     <div class="titlebar-title">
       <span class="titlebar-icon" id="title-icon">🗂</span>
@@ -639,6 +660,16 @@ let navIndex        = 0;
 // ─── NAVIGATION ───────────────────────────────────────────────────────────────
 function navigate(id, pushHistory = true) {
   if (!folders[id]) return;
+
+  if (id === 'github') {
+    window.open('https://github.com/griffindan7', '_blank');
+    return;
+  }
+  if (id === 'linkedin') {
+    window.open('https://linkedin.com/in/daniel-griffin9', '_blank');
+    return;
+  }
+
   currentFolder = id;
   selectedItem  = null;
 
@@ -908,6 +939,62 @@ function closeGotcha() {
   win.classList.add('gotcha');
   setTimeout(() => win.classList.remove('gotcha'), 600);
 }
+
+// ─── MINIMIZE ──────────────────────────────────────────────────────────────────
+let isMinimized = false;
+function minimizeWindow() {
+  const win = document.getElementById('window');
+  if (isMinimized) {
+    win.classList.remove('minimized');
+    win.classList.add('restoring');
+    setTimeout(() => win.classList.remove('restoring'), 400);
+    isMinimized = false;
+  } else {
+    win.classList.add('minimized');
+    isMinimized = true;
+  }
+}
+
+// Restore on click when minimized
+document.addEventListener('click', (e) => {
+  const win = document.getElementById('window');
+  if (isMinimized && !win.contains(e.target) && e.target !== document.body) {
+    minimizeWindow();
+  }
+}, true);
+
+// ─── MAXIMIZE ─────────────────────────────────────────────────────────────────
+let isMaximized = false;
+function toggleMaximize() {
+  const win = document.getElementById('window');
+  isMaximized = !isMaximized;
+  win.classList.toggle('maximized', isMaximized);
+}
+
+// ─── DRAGGABLE ────────────────────────────────────────────────────────────────
+let isDragging = false;
+let dragOffsetX = 0;
+let dragOffsetY = 0;
+const titlebar = document.querySelector('.titlebar');
+const win = document.getElementById('window');
+
+titlebar.addEventListener('mousedown', (e) => {
+  if (isMaximized || e.target.closest('.dot') || e.target.closest('.search-input')) return;
+  isDragging = true;
+  dragOffsetX = e.clientX - win.offsetLeft;
+  dragOffsetY = e.clientY - win.offsetTop;
+  win.style.position = 'fixed';
+});
+
+document.addEventListener('mousemove', (e) => {
+  if (!isDragging) return;
+  win.style.left = (e.clientX - dragOffsetX) + 'px';
+  win.style.top = (e.clientY - dragOffsetY) + 'px';
+});
+
+document.addEventListener('mouseup', () => {
+  isDragging = false;
+});
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 navigate('home', false);
