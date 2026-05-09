@@ -389,7 +389,7 @@
     50% { opacity: 0; transform: scale(0.95); }
     100% { opacity: 1; transform: scale(1); }
   }
-  .window.gotcha { animation: closeGotcha 0.6s ease-out; }
+  .window.gotcha { animation: closeGotcha 0.4s ease-out; }
   @keyframes minimizeToDock {
     0% { opacity: 1; transform: scale(1) translate(0, 0); }
     100% { opacity: 0.5; transform: scale(0.15) translate(280px, 200px); }
@@ -930,7 +930,7 @@ function updateStatus(n) {
 function closeGotcha() {
   const win = document.getElementById('window');
   win.classList.add('gotcha');
-  setTimeout(() => win.classList.remove('gotcha'), 600);
+  setTimeout(() => win.classList.remove('gotcha'), 400);
 }
 
 // ─── MINIMIZE ──────────────────────────────────────────────────────────────────
