@@ -1,1 +1,5 @@
-# portfolio website resembling the finder application in MacOS
+# portfolio website
+
+resembling the finder application in MacOS
+
+...
