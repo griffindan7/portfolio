@@ -452,6 +452,113 @@
     100% { opacity: 1; transform: scale(1) translate(0, 0); }
   }
   .window.restoring { animation: restoreFromDock 0.4s ease-out forwards; }
+
+  /* QUICK LOOK MODAL */
+  .ql-backdrop {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(2px);
+    z-index: 100;
+  }
+  .ql-backdrop.active { display: block; }
+
+  .ql-modal {
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    height: 90%;
+    max-width: 800px;
+    max-height: 950px;
+    background: #2a2a2a;
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    flex-direction: column;
+    z-index: 101;
+  }
+
+  .ql-topbar {
+    height: 44px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 16px;
+    flex-shrink: 0;
+    position: relative;
+  }
+
+  .ql-filename {
+    font-size: 13px;
+    font-weight: 500;
+    color: #fff;
+    text-align: center;
+  }
+
+  .ql-close-btn {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 6px;
+    color: #fff;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+    flex-shrink: 0;
+  }
+
+  .ql-close-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+  }
+
+  .ql-download-btn {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 6px;
+    color: #fff;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+    flex-shrink: 0;
+  }
+
+  .ql-download-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+  }
+
+  .ql-content {
+    flex: 1;
+    overflow: hidden;
+    border-radius: 0 0 12px 12px;
+  }
+
+  .ql-content iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
 </style>
 </head>
 <body>
@@ -638,10 +745,22 @@ const folders = {
   projects: {
     label: 'Projects', icon: '📁',
     items: [
+      { id: 'proj_academic',  name: 'Academic',   icon: '🎓', type: 'folder', kind: 'Folder', date: '09 Sep 2022', size: '—' },
+      { id: 'proj_personal',  name: 'Personal',   icon: '💻', type: 'folder', kind: 'Folder', date: '15 Jan 2025', size: '—' },
+    ]
+  },
+  proj_academic: {
+    label: 'Academic', icon: '🎓',
+    items: [
+      { id: 'proj_bluetooth', name: 'Bluetooth Emergency Exit Sign', icon: '🚨', type: 'file', kind: 'University Project', date: 'Jun 2023', size: '—' },
+    ]
+  },
+  proj_personal: {
+    label: 'Personal', icon: '💻',
+    items: [
       { id: 'proj_dash',  name: 'Dashboard Rebuild',     icon: '📊', type: 'file', kind: 'Power BI',  date: '10 Apr 2025', size: '3.4 MB' },
       { id: 'proj_inv',   name: 'Inventory Tracker',     icon: '📦', type: 'file', kind: 'Excel',     date: '15 Jan 2025', size: '840 KB' },
       { id: 'proj_sales', name: 'Sales Forecast Model',  icon: '📈', type: 'file', kind: 'Python',    date: '03 Mar 2025', size: '1.2 MB' },
-      { id: 'proj_snack', name: 'Snack Analytics',       icon: '🥐', type: 'file', kind: 'Power BI',  date: '22 Feb 2025', size: '2.1 MB' },
     ]
   },
   about: {
@@ -653,11 +772,13 @@ const folders = {
   skills: {
     label: 'Skills', icon: '⚙️',
     items: [
-      { id: 'skill_sql',     name: 'SQL',          icon: '🗄️', type: 'file', kind: 'Language',  date: '—', size: '—' },
-      { id: 'skill_powerbi', name: 'Power BI',     icon: '📊', type: 'file', kind: 'Tool',      date: '—', size: '—' },
-      { id: 'skill_excel',   name: 'Excel',        icon: '📗', type: 'file', kind: 'Tool',      date: '—', size: '—' },
-      { id: 'skill_python',  name: 'Python',       icon: '🐍', type: 'file', kind: 'Language',  date: '—', size: '—' },
-      { id: 'skill_dax',     name: 'DAX',          icon: '🔢', type: 'file', kind: 'Language',  date: '—', size: '—' },
+      { id: 'skill_sql',     name: 'SQL',       icon: '🗄️', type: 'file', kind: 'Language',  date: '—', size: '—' },
+      { id: 'skill_powerbi', name: 'Power BI',  icon: '📊', type: 'file', kind: 'Tool',      date: '—', size: '—' },
+      { id: 'skill_excel',   name: 'Excel',     icon: '📗', type: 'file', kind: 'Tool',      date: '—', size: '—' },
+      { id: 'skill_python',  name: 'Python',    icon: '🐍', type: 'file', kind: 'Language',  date: '—', size: '—' },
+      { id: 'skill_tableau', name: 'Tableau',   icon: '📈', type: 'file', kind: 'Tool',      date: '—', size: '—' },
+      { id: 'skill_sap',     name: 'SAP',       icon: '⚙️', type: 'file', kind: 'Tool',      date: '—', size: '—' },
+      { id: 'skill_dax',     name: 'DAX',       icon: '🔢', type: 'file', kind: 'Language',  date: '—', size: '—' },
     ]
   },
   contact: {
@@ -684,23 +805,27 @@ const folders = {
 
 const details = {
   home:         { icon:'🏠', name:'Home', sub:'Portfolio root', rows:[{k:'Items',v:'5'},{k:'Type',v:'Root folder'}], tags:[] },
-  projects:     { icon:'📁', name:'Projects', sub:'4 items', rows:[{k:'Items',v:'4'},{k:'Type',v:'Folder'}], tags:[] },
+  projects:     { icon:'📁', name:'Projects', sub:'2 folders', rows:[{k:'Items',v:'2'},{k:'Type',v:'Folder'}], tags:[] },
+  proj_academic: { icon:'🎓', name:'Academic Projects', sub:'University & college work', rows:[{k:'Items',v:'1'},{k:'Type',v:'Folder'}], tags:[] },
+  proj_personal: { icon:'💻', name:'Personal Projects', sub:'Spare time & learning', rows:[{k:'Items',v:'3'},{k:'Type',v:'Folder'}], tags:[] },
   about:        { icon:'👤', name:'About Me', sub:'1 item', rows:[{k:'Type',v:'Folder'}], tags:[] },
-  skills:       { icon:'⚙️', name:'Skills', sub:'5 items', rows:[{k:'Type',v:'Folder'}], tags:[] },
+  skills:       { icon:'⚙️', name:'Skills', sub:'7 items', rows:[{k:'Type',v:'Folder'}], tags:[] },
   contact:      { icon:'✉️', name:'Contact', sub:'3 items', rows:[{k:'Type',v:'Folder'}], tags:[] },
   github:       { icon:'🐙', name:'GitHub', sub:'github.com', rows:[{k:'URL',v:'github.com/griffindan7'}], tags:[] },
   linkedin:     { icon:'💼', name:'LinkedIn', sub:'linkedin.com', rows:[{k:'URL',v:'linkedin.com/in/daniel-griffin9'}], tags:[] },
   cv:           { icon:'📄', name:'CV.pdf', sub:'PDF Document · 142 KB', rows:[{k:'Size',v:'142 KB'},{k:'Modified',v:'01 Apr 2025'}], tags:[] },
+  proj_bluetooth: { icon:'🚨', name:'Bluetooth Emergency Exit Sign', sub:'University Project · 2022–2023', rows:[{k:'Focus',v:'Routing algorithms & Bluetooth'},{k:'Stack',v:'IoT, Algorithms'},{k:'University',v:'UCC'},{k:'Duration',v:'Sep 2022 - Jun 2023'}], tags:['IoT','Routing','Beacon'] },
   proj_dash:    { icon:'📊', name:'Dashboard Rebuild', sub:'Power BI · Apr 2025', rows:[{k:'Stack',v:'Power BI, SQL, DAX'},{k:'Impact',v:'−60% reporting time'},{k:'Status',v:'Shipped ✓'},{k:'Size',v:'3.4 MB'}], tags:['Power BI','SQL','DAX'] },
   proj_inv:     { icon:'📦', name:'Inventory Tracker', sub:'Excel VBA · Jan 2025', rows:[{k:'Stack',v:'Excel, VBA, Power Query'},{k:'Impact',v:'Automated stock reports'},{k:'Status',v:'Shipped ✓'},{k:'Size',v:'840 KB'}], tags:['Excel','VBA','Power Query'] },
   proj_sales:   { icon:'📈', name:'Sales Forecast Model', sub:'Python · Mar 2025', rows:[{k:'Stack',v:'Python, pandas, Prophet'},{k:'Impact',v:'12-week forecast'},{k:'Status',v:'In Progress'},{k:'Size',v:'1.2 MB'}], tags:['Python','pandas','Prophet'] },
-  proj_snack:   { icon:'🥐', name:'Snack Analytics', sub:'Power BI · Feb 2025', rows:[{k:'Stack',v:'SQL, Power BI'},{k:'Impact',v:'Unified SKU view'},{k:'Status',v:'Shipped ✓'},{k:'Size',v:'2.1 MB'}], tags:['SQL','Power BI'] },
-  about_readme: { icon:'📝', name:'README.txt', sub:'About the developer', rows:[{k:'Name',v:'Daniel Griffin'},{k:'Role',v:'Technical Data Analyst'},{k:'Based',v:'Meath, Ireland'},{k:'Exp',v:'3+ years analytics'}], tags:[] },
-  skill_sql:     { icon:'🗄️', name:'SQL', sub:'Language · Advanced', rows:[{k:'Level',v:'Advanced'},{k:'Used at',v:'Tayto, Verizon'}], tags:['Databases','Queries','ETL'] },
-  skill_powerbi: { icon:'📊', name:'Power BI', sub:'Tool · Advanced', rows:[{k:'Level',v:'Advanced'},{k:'Focus',v:'Dashboards, DAX'}], tags:['DAX','Visuals','Reports'] },
-  skill_excel:   { icon:'📗', name:'Excel', sub:'Tool · Expert', rows:[{k:'Level',v:'Expert'},{k:'Focus',v:'Power Query, VBA'}], tags:['Power Query','VBA','Pivot'] },
-  skill_python:  { icon:'🐍', name:'Python', sub:'Language · Intermediate', rows:[{k:'Level',v:'Intermediate'},{k:'Libraries',v:'pandas, matplotlib'}], tags:['pandas','numpy','matplotlib'] },
-  skill_dax:     { icon:'🔢', name:'DAX', sub:'Language · Advanced', rows:[{k:'Level',v:'Advanced'},{k:'Used in',v:'Power BI'}], tags:['Power BI','Calculated Cols'] },
+  about_readme: { icon:'📝', name:'README.txt', sub:'About the developer', rows:[{k:'Name',v:'Daniel Griffin'},{k:'Role',v:'Technical Data Analyst'},{k:'Based',v:'Meath, Ireland'},{k:'Education',v:'UCC (Computer Science)'},{k:'Experience',v:'3+ years in data analytics'}], tags:[] },
+  skill_sql:     { icon:'🗄️', name:'SQL', sub:'Language · Advanced', rows:[{k:'Level',v:'Advanced'},{k:'Used at',v:'Tayto, Verizon'},{k:'Focus',v:'Data analysis & reporting'}], tags:['Databases','Queries','ETL'] },
+  skill_powerbi: { icon:'📊', name:'Power BI', sub:'Tool · Advanced', rows:[{k:'Level',v:'Advanced'},{k:'Focus',v:'Dashboards, DAX, Reports'},{k:'Used at',v:'Tayto Snacks'}], tags:['DAX','Visuals','Reports'] },
+  skill_excel:   { icon:'📗', name:'Excel', sub:'Tool · Expert', rows:[{k:'Level',v:'Expert'},{k:'Focus',v:'Power Query, VBA, Analysis'},{k:'Used at',v:'Verizon'}], tags:['Power Query','VBA','Pivot'] },
+  skill_python:  { icon:'🐍', name:'Python', sub:'Language · Intermediate', rows:[{k:'Level',v:'Intermediate'},{k:'Libraries',v:'pandas, matplotlib, Prophet'},{k:'Use',v:'Data analysis & forecasting'}], tags:['pandas','numpy','matplotlib'] },
+  skill_tableau: { icon:'📈', name:'Tableau', sub:'Tool · Intermediate', rows:[{k:'Level',v:'Intermediate'},{k:'Focus',v:'Dashboards & Visualization'}], tags:['Visualization','BI'] },
+  skill_sap:     { icon:'⚙️', name:'SAP', sub:'ERP · Advanced', rows:[{k:'Level',v:'Advanced'},{k:'Focus',v:'Data quality, Master data'},{k:'Used at',v:'Verizon'}], tags:['ERP','Master Data','DQM'] },
+  skill_dax:     { icon:'🔢', name:'DAX', sub:'Language · Advanced', rows:[{k:'Level',v:'Advanced'},{k:'Used in',v:'Power BI'},{k:'Focus',v:'Calculated columns & measures'}], tags:['Power BI','Calculated Cols'] },
   contact_email: { icon:'📧', name:'Email', sub:'gmail.com', rows:[{k:'Address',v:'griffindan11@gmail.com'}], tags:[] },
   contact_gh:    { icon:'🐙', name:'GitHub', sub:'github.com', rows:[{k:'URL',v:'github.com/griffindan7'}], tags:[] },
   contact_li:    { icon:'💼', name:'LinkedIn', sub:'linkedin.com', rows:[{k:'URL',v:'linkedin.com/in/daniel-griffin9'}], tags:[] },
@@ -900,7 +1025,9 @@ function selectItem(id) {
 }
 
 function openItem(item) {
-  if (item.type === 'folder') {
+  if (item.id === 'cv') {
+    openQuickLook();
+  } else if (item.type === 'folder') {
     navigate(item.id);
   } else {
     selectItem(item.id);
@@ -1048,8 +1175,51 @@ document.addEventListener('click', (e) => {
   }
 }, true);
 
+// ─── QUICK LOOK MODAL ─────────────────────────────────────────────────────────
+function openQuickLook() {
+  const backdrop = document.getElementById('ql-backdrop');
+  backdrop.classList.add('active');
+}
+
+function closeQuickLook() {
+  const backdrop = document.getElementById('ql-backdrop');
+  backdrop.classList.remove('active');
+}
+
+function downloadCV() {
+  const link = document.createElement('a');
+  link.href = './Daniel_Griffin_-_Resume.pdf';
+  link.download = 'Daniel_Griffin_-_Resume.pdf';
+  link.click();
+}
+
+document.getElementById('ql-backdrop').addEventListener('click', (e) => {
+  if (e.target.id === 'ql-backdrop') closeQuickLook();
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && document.getElementById('ql-backdrop').classList.contains('active')) {
+    closeQuickLook();
+  }
+});
+
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 navigate('home', false);
 </script>
+
+<!-- QUICK LOOK MODAL -->
+<div id="ql-backdrop" class="ql-backdrop">
+  <div class="ql-modal">
+    <div class="ql-topbar">
+      <button class="ql-download-btn" onclick="downloadCV()" title="Download">⬇</button>
+      <div class="ql-filename">CV.pdf</div>
+      <button class="ql-close-btn" onclick="closeQuickLook()" title="Close">✕</button>
+    </div>
+    <div class="ql-content">
+      <iframe src="./Daniel_Griffin_-_Resume.pdf" type="application/pdf"></iframe>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
