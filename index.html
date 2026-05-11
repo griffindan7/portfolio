@@ -55,7 +55,7 @@
     align-items: center;
     justify-content: center;
     font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
-    padding: 24px;
+    padding: 16px;
     background-image: url('https://wallpapercave.com/wp/wp9245027.jpg');
     background-size: cover;
     background-position: center;
@@ -117,7 +117,7 @@
 
   /* WINDOW */
   .window {
-    width: 860px;
+    width: min(1100px, calc(100vw - 32px));
     max-width: 100%;
     border-radius: 12px;
     overflow: hidden;
@@ -264,11 +264,11 @@
   .path-sep { color: #bbb; margin: 0 1px; }
 
   /* BODY */
-  .finder-body { display: flex; height: 480px; }
+  .finder-body { display: flex; height: calc(100vh - 180px); min-height: 420px; max-height: 780px; }
 
   /* SIDEBAR */
   .sidebar {
-    width: 165px; flex-shrink: 0;
+    width: 185px; flex-shrink: 0;
     background: var(--sidebar-bg);
     border-right: 1px solid var(--sidebar-border);
     overflow-y: auto; padding: 8px 0 16px;
@@ -387,7 +387,7 @@
   /* DETAIL PANEL (icon/list view) */
   .detail-panel {
     display: none;
-    width: 220px; flex-shrink: 0;
+    width: 260px; flex-shrink: 0;
     background: var(--detail-bg);
     border-left: 1px solid var(--detail-border);
     padding: 16px 12px; overflow-y: auto;
